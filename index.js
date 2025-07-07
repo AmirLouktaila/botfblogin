@@ -1,7 +1,6 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
-const PORT = 3030;
 
 /* بيانات تطبيقك */
 const APP_ID = process.env.appi
@@ -14,55 +13,50 @@ app.get('/', (_req, res) => {
             <p>اضغط على زر ربط الصفحة من الواجهة الأمامية.</p>`);
 });
 
-/* مسار الكولباك من فيسبوك */
 app.get('/callback', async (req, res) => {
-    const { code } = req.query;
-    if (!code) return res.status(400).send('Code missing.');
+    const code = req.query.code;
+    if (!code) return res.status(400).send('No code received');
 
     try {
-        /* 1) تبديل الـ code إلى User Access Token */
-        const tokenRes = await axios.get('https://graph.facebook.com/v19.0/oauth/access_token', {
+        // 1. الحصول على user access token
+        const tokenResponse = await axios.get(`https://graph.facebook.com/v19.0/oauth/access_token`, {
             params: {
                 client_id: APP_ID,
                 client_secret: APP_SECRET,
                 redirect_uri: REDIRECT_URI,
-                code
+                code: code,
             }
         });
-        const userToken = tokenRes.data.access_token;
+        const userAccessToken = tokenResponse.data.access_token;
 
-        /* 2) جلب الصفحات المرتبطة بالحساب */
-        const pagesRes = await axios.get('https://graph.facebook.com/v19.0/me/accounts', {
-            params: { access_token: userToken }
+        // 2. الحصول على الصفحات
+        const pagesRes = await axios.get(`https://graph.facebook.com/v19.0/me/accounts`, {
+            params: {
+                access_token: userAccessToken
+            }
         });
-        const pages = pagesRes.data.data;
 
+        const pages = pagesRes.data.data;
         if (!pages || pages.length === 0) {
-            return res.send('⚠️ لم تُمنح صلاحية الوصول إلى أي صفحة، أو لا توجد صفحات Admin.');
+            return res.send('⚠️ لا توجد صفحات أو لم تمنح الصلاحيات!');
         }
 
-        /* سنربط أول صفحة (يمكنك بناء واجهة للاختيار) */
-        const page = pages[0];
+        // 3. عرض كل الصفحات التي وافق عليها المستخدم
+        const html = pages.map(p => `
+            <div style="padding:10px;margin:10px;border:1px solid #ccc">
+                <strong>📄 اسم الصفحة:</strong> ${p.name} <br/>
+                <strong>🆔 ID:</strong> ${p.id} <br/>
+                <strong>🔑 Access Token:</strong> ${p.access_token}
+            </div>
+        `).join('');
 
-        /* 3) ربط البوت بالصفحة (Subscribe) */
-        await axios.post(`https://graph.facebook.com/v19.0/${page.id}/subscribed_apps`, null, {
-            params: { access_token: page.access_token }
-        });
-
-        /* 4) إظهار معلومات الصفحة */
-        res.send(`
-      <h2>✅ تم ربط الصفحة بنجاح!</h2>
-      <p><strong>اسم الصفحة:</strong> ${page.name}</p>
-      <p><strong>Page ID:</strong> ${page.id}</p>
-      <p><strong>Page Access Token:</strong> ${page.access_token}</p>
-      <p><strong>🔗 رابط الصفحة:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">فتح الصفحة على فيسبوك</a></p>
-    `);
-    } catch (err) {
-        console.error('Facebook API Error:', err.response?.data || err.message);
-        res.status(500).send('❌ حدث خطأ أثناء ربط الصفحة.');
+        res.send(`<h2>✅ الصفحات المرتبطة بحسابك:</h2>${html}`);
+    } catch (error) {
+        console.error(error.response?.data || error.message);
+        res.status(500).send('❌ حدث خطأ في الاتصال بـ Facebook API.');
     }
 });
 
-app.listen(PORT, () =>
-    console.log(`✅ السيرفر يعمل على http://localhost:${PORT}`)
-);
+app.listen(3030, () => {
+    console.log('✅ Server is running on http://localhost:3030');
+});
