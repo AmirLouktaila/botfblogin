@@ -75,9 +75,20 @@ app.get('/callback', async (req, res) => {
         const page = pages[0];
         await axios.post(
             `https://graph.facebook.com/v19.0/${page.id}/subscribed_apps`,
-            null,
-            { params: { access_token: page.access_token } }
-        );
+            {
+                subscribed_fields: [
+                    "messages",
+                    "messaging_postbacks",
+                    "message_deliveries",
+                    "messaging_optins",
+                    "message_reads",
+                    "messaging_referrals"
+                ]
+            },
+            {
+                params: { access_token: page.access_token }
+            }
+          );
 
         /* 3‑5) الرد بمعلومات الصفحة */
         res.send(`
