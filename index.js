@@ -97,6 +97,8 @@ app.get('/callback', async (req, res) => {
         <li><strong>اسم الصفحة:</strong> ${page.name}</li>
         <li><strong>Page ID:</strong> ${page.id}</li>
         <li><strong>Page Access Token:</strong> ${page.access_token}</li>
+            <li><strong>🖼️ صورة الصفحة:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
+
         <li><strong>🔗 رابط الصفحة:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">فتح الصفحة</a></li>
       </ul>
       <p>يمكنك الآن استخدام هذا التوكن لرسائل البوت أو إعداد الـ Webhook.</p>
