@@ -54,7 +54,7 @@ app.get('/', (_req, res) => {
 </head>
 <body>
   <h1>🤖 Simsimi Bot</h1>
-  <p><a href="/login">🔗 ربط صفحتي على فيسبوك</a></p>
+  <p><a href="/login">🔗Link my Facebook page</a></p>
 </body>
 </html>
   `);
