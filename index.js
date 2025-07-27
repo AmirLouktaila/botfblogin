@@ -9,7 +9,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 let pagesCache = []; // لتخزين الصفحات مؤقتًا
 
 // بعد جلب الصفحات في /callback
-pagesCache = pages;
 /* === بيانات تطبيقك === */
 const APP_ID = process.env.appi
 const APP_SECRET = process.env.apps
@@ -165,6 +164,7 @@ app.get('/callback', async (req, res) => {
             params: { access_token: userAccessToken }
         });
         const pages = pagesRes.data.data;
+      pagesCache = pages
         console.log('📄 Pages:', pages);
 
         if (!pages?.length) {
