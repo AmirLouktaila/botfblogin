@@ -1,9 +1,15 @@
 // server.js
 const express = require('express');
 const axios = require('axios');
+const bodyParser = require('body-parser');
 const app = express();
 const PORT = 3030;
+app.use(bodyParser.urlencoded({ extended: true }));
 
+let pagesCache = []; // لتخزين الصفحات مؤقتًا
+
+// بعد جلب الصفحات في /callback
+pagesCache = pages;
 /* === بيانات تطبيقك === */
 const APP_ID = process.env.appi
 const APP_SECRET = process.env.apps
@@ -69,6 +75,64 @@ app.get('/login', (_req, res) => {
     res.redirect(oauthURL);
 });
 
+app.post('/connect-page', (req, res) => {
+  const index = parseInt(req.body.index);
+  const page = pagesCache[index];
+  if (!page) return res.status(404).send("Page not found");
+
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Page Connected</title>
+      <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f3f4f6; padding: 2rem; color: #111827; }
+        .container {
+          max-width: 700px; margin: auto; background: #fff; padding: 2rem;
+          border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        img { max-width: 150px; border-radius: 10px; margin-bottom: 1rem; }
+        button {
+          padding: 0.7rem 1.5rem; font-size: 1rem;
+          background-color: #4f46e5; color: white;
+          border: none; border-radius: 8px; cursor: pointer;
+        }
+        button.running { background-color: #16a34a; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h2>✅ Page Linked Successfully!</h2>
+        <ul>
+          <li><strong>Name Page:</strong> ${page.name}</li>
+          <li><strong>Page ID:</strong> ${page.id}</li>
+          <li><strong>Page Access Token:</strong> ${page.access_token.slice(0, 60)}...</li>
+          <li><strong>🖼️ Image Page:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
+          <li><strong>🔗 Url Page:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">Open Page</a></li>
+        </ul>
+        <p style="text-align: center; margin-top: 1.5rem;">📬 You can now use this token for bot messaging or setting up the Webhook.</p>
+        <div style="text-align: center; margin-top: 2rem;">
+          <button id="startBtn" onclick="toggleButton()">Start</button>
+        </div>
+      </div>
+
+      <script>
+        function toggleButton() {
+          const btn = document.getElementById("startBtn");
+          if (btn.innerText === "Start") {
+            btn.innerText = "Running";
+            btn.classList.add("running");
+          } else {
+            btn.innerText = "Start";
+            btn.classList.remove("running");
+          }
+        }
+      </script>
+    </body>
+    </html>
+  `);
+});
 /* ====== 3) مسار callback من فيسبوك ====== */
 app.get('/callback', async (req, res) => {
     const { code } = req.query;
@@ -136,119 +200,63 @@ res.send(`
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Choose a Page</title>
+  <title>Select a Page</title>
   <style>
     body {
-      background: #f3f4f6;
       font-family: 'Segoe UI', sans-serif;
+      background: #f3f4f6;
       padding: 2rem;
       color: #111827;
     }
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 2rem;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    .page-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
     }
-    select {
-      padding: 0.5rem;
-      font-size: 1rem;
-      width: 100%;
-      margin-bottom: 1rem;
-      border-radius: 6px;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      margin: 1rem 0;
-      background: #f9fafb;
+    .card {
+      background: white;
       padding: 1rem;
-      border-left: 4px solid #4f46e5;
-      border-radius: 6px;
-    }
-    img {
-      max-width: 100%;
       border-radius: 10px;
-      margin-top: 0.5rem;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+      text-align: center;
     }
-    a {
-      color: #2563eb;
-      text-decoration: none;
+    .card img {
+      width: 100px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
     }
-    button {
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
-      background-color: #4f46e5;
+    .card h3 {
+      margin: 0.5rem 0;
+    }
+    .card button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #4f46e5;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       transition: background 0.3s ease;
-      margin-top: 1.5rem;
     }
-    button.running {
-      background-color: #16a34a;
+    .card button:hover {
+      background: #3730a3;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>🧭 Choose a Page to View Details</h2>
-    <select id="pageSelect" onchange="updatePageInfo()">
-      ${pages.map((p, i) => `<option value="${i}">${p.name}</option>`).join('')}
-    </select>
-
-    <div id="pageInfo">
-      <!-- تفاصيل الصفحة تظهر هنا -->
-    </div>
+  <h2>🔗 Choose a Page to Connect</h2>
+  <div class="page-list">
+    ${pages.map((page, i) => `
+      <div class="card">
+        <img src="https://graph.facebook.com/${page.id}/picture?type=large" />
+        <h3>${page.name}</h3>
+        <form method="POST" action="/connect-page">
+          <input type="hidden" name="index" value="${i}" />
+          <button type="submit">Connect</button>
+        </form>
+      </div>
+    `).join('')}
   </div>
-
-  <script>
-    const pages = ${JSON.stringify(pages)};
-
-    function updatePageInfo() {
-      const selected = document.getElementById("pageSelect").value;
-      const page = pages[selected];
-      const html = \`
-        <ul>
-          <li><strong>Name Page:</strong> \${page.name}</li>
-          <li><strong>Page ID:</strong> \${page.id}</li>
-          <li><strong>Page Access Token:</strong> \${page.access_token.slice(0, 60)}...</li>
-          <li><strong>🖼️ Image Page:</strong><br/>
-            <img src="https://graph.facebook.com/\${page.id}/picture?type=large" />
-          </li>
-          <li><strong>🔗 Url Page:</strong> 
-            <a href="https://www.facebook.com/\${page.id}" target="_blank">Open Page</a>
-          </li>
-        </ul>
-        <p style="text-align: center; margin-top: 1.5rem;">
-          📬 You can now use this token for bot messaging or setting up the Webhook.
-        </p>
-        <div style="text-align: center;">
-          <button id="startBtn" onclick="toggleButton()">Start</button>
-        </div>
-      \`;
-      document.getElementById("pageInfo").innerHTML = html;
-    }
-
-    function toggleButton() {
-      const btn = document.getElementById("startBtn");
-      if (btn.innerText === "Start") {
-        btn.innerText = "Running";
-        btn.classList.add("running");
-      } else {
-        btn.innerText = "Start";
-        btn.classList.remove("running");
-      }
-    }
-
-    // عرض أول صفحة تلقائياً
-    window.onload = updatePageInfo;
-  </script>
 </body>
 </html>
 `);
