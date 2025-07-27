@@ -131,12 +131,12 @@ app.get('/callback', async (req, res) => {
           );
 
         /* 3‑5) الرد بمعلومات الصفحة */
-      res.send(`
+res.send(`
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>تم ربط الصفحة</title>
+  <title>Choose a Page</title>
   <style>
     body {
       background: #f3f4f6;
@@ -145,16 +145,19 @@ app.get('/callback', async (req, res) => {
       color: #111827;
     }
     .container {
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
       background: #fff;
       border-radius: 12px;
       padding: 2rem;
       box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     }
-    h2 {
-      color: #16a34a;
-      text-align: center;
+    select {
+      padding: 0.5rem;
+      font-size: 1rem;
+      width: 100%;
+      margin-bottom: 1rem;
+      border-radius: 6px;
     }
     ul {
       list-style: none;
@@ -176,26 +179,7 @@ app.get('/callback', async (req, res) => {
       color: #2563eb;
       text-decoration: none;
     }
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
-</head>
-<body>
-<div class="container">
-  <h2>✅ Page Linked Successfully!</h2>
-  <ul>
-    <li><strong>Name Page:</strong> ${page.name}</li>
-    <li><strong>Page ID:</strong> ${page.id}</li>
-    <li><strong>Page Access Token:</strong> ${page.access_token.slice(0, 60) + "..."}</li>
-    <li><strong>🖼️ Image Page:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
-    <li><strong>🔗Url Page:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">Open Page</a></li>
-  </ul>
-  <p style="text-align: center; margin-top: 1.5rem;">📬 You can now use this token for bot messaging or setting up the Webhook.</p>
-
-  <!-- ✅ زر التشغيل -->
-  <div style="text-align: center; margin-top: 2rem;">
-    <button id="startBtn" onclick="toggleButton()" style="
+    button {
       padding: 0.7rem 1.5rem;
       font-size: 1rem;
       background-color: #4f46e5;
@@ -204,28 +188,71 @@ app.get('/callback', async (req, res) => {
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s ease;
-    ">
-      Start
-    </button>
+      margin-top: 1.5rem;
+    }
+    button.running {
+      background-color: #16a34a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🧭 Choose a Page to View Details</h2>
+    <select id="pageSelect" onchange="updatePageInfo()">
+      ${pages.map((p, i) => `<option value="${i}">${p.name}</option>`).join('')}
+    </select>
+
+    <div id="pageInfo">
+      <!-- تفاصيل الصفحة تظهر هنا -->
+    </div>
   </div>
 
-  <!-- ✅ سكريبت للتغيير -->
   <script>
+    const pages = ${JSON.stringify(pages)};
+
+    function updatePageInfo() {
+      const selected = document.getElementById("pageSelect").value;
+      const page = pages[selected];
+      const html = \`
+        <ul>
+          <li><strong>Name Page:</strong> \${page.name}</li>
+          <li><strong>Page ID:</strong> \${page.id}</li>
+          <li><strong>Page Access Token:</strong> \${page.access_token.slice(0, 60)}...</li>
+          <li><strong>🖼️ Image Page:</strong><br/>
+            <img src="https://graph.facebook.com/\${page.id}/picture?type=large" />
+          </li>
+          <li><strong>🔗 Url Page:</strong> 
+            <a href="https://www.facebook.com/\${page.id}" target="_blank">Open Page</a>
+          </li>
+        </ul>
+        <p style="text-align: center; margin-top: 1.5rem;">
+          📬 You can now use this token for bot messaging or setting up the Webhook.
+        </p>
+        <div style="text-align: center;">
+          <button id="startBtn" onclick="toggleButton()">Start</button>
+        </div>
+      \`;
+      document.getElementById("pageInfo").innerHTML = html;
+    }
+
     function toggleButton() {
       const btn = document.getElementById("startBtn");
       if (btn.innerText === "Start") {
         btn.innerText = "Running";
-        btn.style.backgroundColor = "#16a34a"; // أخضر
+        btn.classList.add("running");
       } else {
         btn.innerText = "Start";
-        btn.style.backgroundColor = "#4f46e5"; // أزرق بنفسجي
+        btn.classList.remove("running");
       }
     }
+
+    // عرض أول صفحة تلقائياً
+    window.onload = updatePageInfo;
   </script>
-</div>
 </body>
 </html>
 `);
+
 
     } catch (err) {
         console.error('❌ Facebook API Error:', err.response?.data || err.message);
