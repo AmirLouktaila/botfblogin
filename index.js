@@ -185,13 +185,13 @@ app.get('/callback', async (req, res) => {
   <div class="container">
     <h2>✅ تم ربط الصفحة بنجاح!</h2>
     <ul>
-      <li><strong>اسم الصفحة:</strong> ${page.name}</li>
+      <li><strong>Name Page:</strong> ${page.name}</li>
       <li><strong>Page ID:</strong> ${page.id}</li>
-      <li><strong>Page Access Token:</strong> ${page.access_token}</li>
-      <li><strong>🖼️ صورة الصفحة:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
-      <li><strong>🔗 رابط الصفحة:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">فتح الصفحة</a></li>
+      <li><strong>Page Access Token:</strong> ${page.access_token.slice(0, 100) + "..."}</li>
+      <li><strong>🖼️ Image Page:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
+      <li><strong>🔗Url Page:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">فتح الصفحة</a></li>
     </ul>
-    <p style="text-align: center; margin-top: 1.5rem;">📬 يمكنك الآن استخدام هذا التوكن لرسائل البوت أو إعداد الـ Webhook.</p>
+    <p style="text-align: center; margin-top: 1.5rem;">📬 You can now use this token for bot messaging or setting up the Webhook.</p>
   </div>
 </body>
 </html>
