@@ -6,10 +6,9 @@ const app = express();
 const PORT = 3030;
 app.use(bodyParser.urlencoded({ extended: true }));
 
-let pagesCache = []; // لتخزين الصفحات مؤقتًا
+let pagesCache = [];
 
-// بعد جلب الصفحات في /callback
-/* === بيانات تطبيقك === */
+
 const APP_ID = process.env.appi
 const APP_SECRET = process.env.apps
 const REDIRECT_URI = `${process.env.RENDER_EXTERNAL_URL}/callback`
