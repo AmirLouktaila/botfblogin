@@ -11,9 +11,49 @@ const REDIRECT_URI = `${process.env.RENDER_EXTERNAL_URL}/callback`
 
 /* ====== 1) صفحة رئيسية بسيطة ====== */
 app.get('/', (_req, res) => {
-    res.send(`
-    <h1>✅ Simsimi Bot Login</h1>
-    <p><a href="/login">ربط صفحتي على فيسبوك</a></p>
+  res.send(`
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ربط صفحة فيسبوك</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    a {
+      background: #fff;
+      color: #4f46e5;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      text-decoration: none;
+      transition: 0.3s ease;
+    }
+    a:hover {
+      background: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <h1>🤖 Simsimi Bot</h1>
+  <p><a href="/login">🔗 ربط صفحتي على فيسبوك</a></p>
+</body>
+</html>
   `);
 });
 
@@ -91,18 +131,72 @@ app.get('/callback', async (req, res) => {
           );
 
         /* 3‑5) الرد بمعلومات الصفحة */
-        res.send(`
-      <h2>✅ تم ربط الصفحة بنجاح!</h2>
-      <ul>
-        <li><strong>اسم الصفحة:</strong> ${page.name}</li>
-        <li><strong>Page ID:</strong> ${page.id}</li>
-        <li><strong>Page Access Token:</strong> ${page.access_token}</li>
-            <li><strong>🖼️ صورة الصفحة:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
+      res.send(`
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>تم ربط الصفحة</title>
+  <style>
+    body {
+      background: #f3f4f6;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      color: #111827;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #16a34a;
+      text-align: center;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 1rem 0;
+      background: #f9fafb;
+      padding: 1rem;
+      border-left: 4px solid #4f46e5;
+      border-radius: 6px;
+    }
+    img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 0.5rem;
+    }
+    a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>✅ تم ربط الصفحة بنجاح!</h2>
+    <ul>
+      <li><strong>اسم الصفحة:</strong> ${page.name}</li>
+      <li><strong>Page ID:</strong> ${page.id}</li>
+      <li><strong>Page Access Token:</strong> ${page.access_token}</li>
+      <li><strong>🖼️ صورة الصفحة:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
+      <li><strong>🔗 رابط الصفحة:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">فتح الصفحة</a></li>
+    </ul>
+    <p style="text-align: center; margin-top: 1.5rem;">📬 يمكنك الآن استخدام هذا التوكن لرسائل البوت أو إعداد الـ Webhook.</p>
+  </div>
+</body>
+</html>
+`);
 
-        <li><strong>🔗 رابط الصفحة:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">فتح الصفحة</a></li>
-      </ul>
-      <p>يمكنك الآن استخدام هذا التوكن لرسائل البوت أو إعداد الـ Webhook.</p>
-    `);
     } catch (err) {
         console.error('❌ Facebook API Error:', err.response?.data || err.message);
         res.status(500).send('❌ حدث خطأ أثناء عملية الربط. راجع سجلات الخادم.');
