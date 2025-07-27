@@ -182,17 +182,47 @@ app.get('/callback', async (req, res) => {
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>✅ تم ربط الصفحة بنجاح!</h2>
-    <ul>
-      <li><strong>Name Page:</strong> ${page.name}</li>
-      <li><strong>Page ID:</strong> ${page.id}</li>
-      <li><strong>Page Access Token:</strong> ${page.access_token.slice(0, 100) + "..."}</li>
-      <li><strong>🖼️ Image Page:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
-      <li><strong>🔗Url Page:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">فتح الصفحة</a></li>
-    </ul>
-    <p style="text-align: center; margin-top: 1.5rem;">📬 You can now use this token for bot messaging or setting up the Webhook.</p>
+<div class="container">
+  <h2>✅ Page Linked Successfully!</h2>
+  <ul>
+    <li><strong>Name Page:</strong> ${page.name}</li>
+    <li><strong>Page ID:</strong> ${page.id}</li>
+    <li><strong>Page Access Token:</strong> ${page.access_token.slice(0, 60) + "..."}</li>
+    <li><strong>🖼️ Image Page:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
+    <li><strong>🔗Url Page:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">Open Page</a></li>
+  </ul>
+  <p style="text-align: center; margin-top: 1.5rem;">📬 You can now use this token for bot messaging or setting up the Webhook.</p>
+
+  <!-- ✅ زر التشغيل -->
+  <div style="text-align: center; margin-top: 2rem;">
+    <button id="startBtn" onclick="toggleButton()" style="
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      background-color: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    ">
+      Start
+    </button>
   </div>
+
+  <!-- ✅ سكريبت للتغيير -->
+  <script>
+    function toggleButton() {
+      const btn = document.getElementById("startBtn");
+      if (btn.innerText === "Start") {
+        btn.innerText = "Running";
+        btn.style.backgroundColor = "#16a34a"; // أخضر
+      } else {
+        btn.innerText = "Start";
+        btn.style.backgroundColor = "#4f46e5"; // أزرق بنفسجي
+      }
+    }
+  </script>
+</div>
 </body>
 </html>
 `);
