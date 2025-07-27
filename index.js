@@ -104,7 +104,8 @@ app.post('/connect-page', (req, res) => {
         <ul>
           <li><strong>Name Page:</strong> ${page.name}</li>
           <li><strong>Page ID:</strong> ${page.id}</li>
-          <li><strong>Page Access Token:</strong> ${page.access_token.slice(0, 60)}...</li>
+                    <li><strong>Page Access Token:</strong> ***************************************************...</li>
+          // <li><strong>Page Access Token:</strong> ${page.access_token.slice(0, 60)}...</li>
           <li><strong>🖼️ Image Page:</strong><br/><img src="https://graph.facebook.com/${page.id}/picture?type=large" /></li>
           <li><strong>🔗 Url Page:</strong> <a href="https://www.facebook.com/${page.id}" target="_blank">Open Page</a></li>
         </ul>
